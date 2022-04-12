@@ -1,11 +1,13 @@
-﻿@{
+﻿@model InsecureWebsite.Models.ProfileModel
+@{
     ViewBag.Title = "Profile";
     Layout = "_Layout";
 }
 
 <h2>Profile</h2>
 
-<p>Hi @User.Identity.Name</p>
+<p>Hi @User.Identity.Name!</p>
+<p>Welcome to your profile, here you'll see no sensitive information because this is an insecure website and that would be silly.</p>
 
 @if (!string.IsNullOrWhiteSpace(ViewBag.Error))
 {
@@ -16,11 +18,58 @@
     <p class="text-success">@ViewBag.Success</p>
 }
 
-<div class="card">
+<div class="card" style="width: 18rem;">
     <div class="card-header">Change password</div>
-    <form method="post" action="/Profile/ChangePassword">
-        Password
-        <input type="password" id="Password" name="Password" value=""/>
-        <input type="submit" value="Submit" class="btn btn-warning"/>
-    </form>
+    <div class="card-body">
+        <form method="post" action="/Profile/ChangePassword">
+            <div>
+                <label for="Password">Password</label>
+                <input class="form-control" type="password" id="Password" name="Password" value=""/>
+            </div>
+            <button type="submit" class="btn btn-warning">Submit</button>
+        </form>
+    </div>
+</div>
+<br/>
+<div class="card" style="width: 18rem;">
+    <div class="card-header">Message board</div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            This is your personal message board, here you can try out some XSS attacks.
+        </li>
+        <li class="list-group-item">
+            <div class="card-body">
+
+                @using (Html.BeginForm("PostMessage", "Profile", FormMethod.Post))
+                {
+                    <label>Message to post</label>
+                    <input id="Message" type="text" name="Message" value=""/>
+                    <input type="submit" value="Submit" class="btn btn-success"/>
+                }
+
+            </div>
+        </li>
+        @if (Model.Messages.Length > 0)
+        {
+            foreach (var messageModel in Model.Messages)
+            {
+                <li class="list-group-item">
+                    <!--Intentionally render the raw message, which could be a script and exploited via XSS-->
+                    @Html.Raw(messageModel.Message)
+
+                    @using (Html.BeginForm("DeleteMessage", "Profile", FormMethod.Post))
+                    {
+                        <input hidden id="Id" name="Id" value="@messageModel.Id"/>
+                        <input type="submit" value="Delete" class="btn btn-sm btn-danger"/>
+                    }
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item">
+                <p>No messages</p>
+            </li>
+        }
+    </ul>
 </div>

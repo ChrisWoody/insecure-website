@@ -4,14 +4,13 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome to the Insecure Website</h1>
+    <p>Here you'll be able to try and exploit various security misconfigurations.</p>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <p>Hi @User.Identity.Name! You can get back to your profile from @Html.ActionLink("here", "Index", "Profile").</p>
+    }
+    else
+    {
+        <p>If you have an account you can login @Html.ActionLink("here", "Login", "Account"), otherwise you can create an account @Html.ActionLink("here", "Register", "Account").</p>
+    }
 </div>
-
-@if (User.Identity.IsAuthenticated)
-{
-    <p>Hi @User.Identity.Name</p>
-}
-else
-{
-    @Html.ActionLink("Login here", "Login", "Account")
-    @Html.ActionLink("Register here", "Register", "Account")
-}
