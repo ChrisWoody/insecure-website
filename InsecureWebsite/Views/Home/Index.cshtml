@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to the Insecure Website</h1>
+</div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <p>Hi @User.Identity.Name</p>
+}
+else
+{
+    @Html.ActionLink("Login here", "Login", "Account")
+    @Html.ActionLink("Register here", "Register", "Account")
+}

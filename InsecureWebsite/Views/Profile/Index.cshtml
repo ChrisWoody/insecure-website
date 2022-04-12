@@ -1,0 +1,26 @@
+﻿@{
+    ViewBag.Title = "Profile";
+    Layout = "_Layout";
+}
+
+<h2>Profile</h2>
+
+<p>Hi @User.Identity.Name</p>
+
+@if (!string.IsNullOrWhiteSpace(ViewBag.Error))
+{
+    <p class="text-warning">@ViewBag.Error</p>
+}
+@if (!string.IsNullOrWhiteSpace(ViewBag.Success))
+{
+    <p class="text-success">@ViewBag.Success</p>
+}
+
+<div class="card">
+    <div class="card-header">Change password</div>
+    <form method="post" action="/Profile/ChangePassword">
+        Password
+        <input type="password" id="Password" name="Password" value=""/>
+        <input type="submit" value="Submit" class="btn btn-warning"/>
+    </form>
+</div>

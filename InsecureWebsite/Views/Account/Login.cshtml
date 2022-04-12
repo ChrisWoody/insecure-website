@@ -1,0 +1,27 @@
+﻿@model InsecureWebsite.Models.LoginRegisterModel
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "_Layout";
+}
+
+<h2>Login</h2>
+
+@if (!string.IsNullOrWhiteSpace(ViewBag.Error))
+{
+    <p class="text-warning">@ViewBag.Error</p>
+}
+@if (!string.IsNullOrWhiteSpace(ViewBag.Success))
+{
+    <p class="text-success">@ViewBag.Success</p>
+}
+
+<form method="post" action="/Account/Login">
+    Username
+    <input type="text" id="Username" name="Username" value="" />
+    <br/>
+    Password
+    <input type="password" id="Password" name="Password" value="" />
+    <br/>
+    <input type="submit" value="Submit" class="btn btn-success" />
+</form>
