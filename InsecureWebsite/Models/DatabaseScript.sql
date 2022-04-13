@@ -23,3 +23,16 @@ create table [UserMessage]
 	[Message] nvarchar(2048) not null
 )
 go
+
+
+drop table if exists [UserToUserMessage]
+go
+
+create table [UserToUserMessage]
+(
+	[Id] int identity(1,1) primary key,
+	[FromUsername] varchar(20) not null,
+	[ToUsername] varchar(20) not null,
+	[Message] nvarchar(2048) not null
+)
+go

@@ -28,32 +28,32 @@ public class ProfileController : Controller
         if (string.IsNullOrWhiteSpace(model.Password))
         {
             ViewBag.Error = "Must specify a password";
-            return View("Index", await GetProfileModel());
+            return RedirectToAction("Index");
         }
 
         if (model.Password.Length > 20)
         {
             ViewBag.Error = "Password must be less than 20 characters";
-            return View("Index", await GetProfileModel());
+            return RedirectToAction("Index");
         }
 
         if (!model.Password.All(_configuration["AllowedPasswordCharacters"].Contains))
         {
             ViewBag.Error = "Password must only contain the following characters: " + _configuration["AllowedPasswordCharacters"];
-            return View("Index", await GetProfileModel());
+            return RedirectToAction("Index");
         }
 
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
         con.Open();
 
-        var password = await con.ExecuteAsync("update [User] set [Password] = @Password where [Username] = @Username", new
+        await con.ExecuteAsync("update [User] set [Password] = @Password where [Username] = @Username", new
         {
             Username = User.Identity.Name,
             Password = CipherStringWithAnUnguessableMechanism(model.Password)
         });
 
         ViewBag.Success = "You're password has been updated successfully";
-        return View("Index", await GetProfileModel());
+        return RedirectToAction("Index");
     }
 
     [HttpPost]
@@ -65,7 +65,7 @@ public class ProfileController : Controller
         await con.ExecuteAsync("insert into [UserMessage]([Username], [DisplayRaw], [Message]) values (@Username, 1, @Message)",
             new {Username = User.Identity.Name, model.Message});
 
-        return View("Index", await GetProfileModel());
+        return RedirectToAction("Index");
     }
 
     // No validation that the person updating the message has access to that message (i.e. is the same user)
@@ -77,7 +77,7 @@ public class ProfileController : Controller
         await con.OpenAsync();
         await con.ExecuteAsync("update [UserMessage] set [DisplayRaw] = case when [DisplayRaw] = 1 then 0 else 1 end where [Id] = @Id", model);
 
-        return View("Index", await GetProfileModel());
+        return RedirectToAction("Index");
     }
 
     // No validation that the person deleting the message has access to that message (i.e. is the same user)
@@ -89,7 +89,7 @@ public class ProfileController : Controller
         await con.OpenAsync();
         await con.ExecuteAsync("delete from [UserMessage] where [Id] = @Id", model);
 
-        return View("Index", await GetProfileModel());
+        return RedirectToAction("Index");
     }
 
     private string CipherStringWithAnUnguessableMechanism(string str)

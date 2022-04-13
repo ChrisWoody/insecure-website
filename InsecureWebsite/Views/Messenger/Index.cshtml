@@ -1,0 +1,59 @@
+﻿@model InsecureWebsite.Models.MessengerModel
+
+@{
+    ViewBag.Title = "Messenger";
+    Layout = "_Layout";
+}
+
+<h2>Messenger</h2>
+<p>Look at or send messages between yourself and another user.</p>
+
+@if (!string.IsNullOrWhiteSpace(ViewBag.Error))
+{
+    <p class="text-danger">@ViewBag.Error</p>
+}
+@if (!string.IsNullOrWhiteSpace(ViewBag.Success))
+{
+    <p class="text-success">@ViewBag.Success</p>
+}
+
+@using (Html.BeginForm("GetMessages", "Messenger", FormMethod.Post))
+{
+    <label>Other user</label>
+    <input id="OtherUser" type="text" name="OtherUser" value=""/>
+    <input type="submit" value="Search" class="btn btn-sm btn-success"/>
+}
+
+@if (Model != null && Model.Messages != null)
+{
+    <h3>Messages</h3>
+
+    if (Model.Messages.Count > 0)
+    {
+        <table class="table">
+            <thead>
+            <tr>
+                @foreach (var key in Model.Messages.Keys)
+                {
+                    <th>@key</th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @for (var i = 0; i < Model.Messages.First().Value.Length; i++)
+            {
+                <tr>
+                    @foreach (var key in Model.Messages.Keys)
+                    {
+                        <td>@Model.Messages[key][i]</td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No messages found</p>
+    }
+}
