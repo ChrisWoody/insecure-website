@@ -4,10 +4,8 @@
     Layout = "_Layout";
 }
 
-<h2>Profile</h2>
-
-<p>Hi @User.Identity.Name!</p>
-<p>Welcome to your profile, here you'll see no sensitive information because this is an insecure website and that would be silly.</p>
+<h2>Hi @User.Identity.Name and welcome to your profile!</h2>
+<p>Here you'll see no sensitive information because this is an insecure website and that would be silly.</p>
 
 @if (!string.IsNullOrWhiteSpace(ViewBag.Error))
 {
@@ -18,20 +16,19 @@
     <p class="text-success">@ViewBag.Success</p>
 }
 
-<div class="card" style="width: 18rem;">
+<div class="card" style="width: 30rem;">
     <div class="card-header">Change password</div>
     <div class="card-body">
         <form method="post" action="/Profile/ChangePassword">
             <div>
-                <label for="Password">Password</label>
                 <input class="form-control" type="password" id="Password" name="Password" value=""/>
             </div>
-            <button type="submit" class="btn btn-warning">Submit</button>
+            <button type="submit" class="btn btn-sm btn-warning">Submit</button>
         </form>
     </div>
 </div>
 <br/>
-<div class="card" style="width: 18rem;">
+<div class="card" style="width: 30rem;">
     <div class="card-header">Message board</div>
     <ul class="list-group list-group-flush">
         <li class="list-group-item">
@@ -43,33 +40,75 @@
                 @using (Html.BeginForm("PostMessage", "Profile", FormMethod.Post))
                 {
                     <label>Message to post</label>
-                    <input id="Message" type="text" name="Message" value=""/>
-                    <input type="submit" value="Submit" class="btn btn-success"/>
+                    <!--Client side only restriction on the maxLength of the input field-->
+                    <input id="Message" type="text" name="Message" value="" maxlength="2048"/>
+                    <input type="submit" value="Submit" class="btn btn-sm btn-success"/>
                 }
 
             </div>
         </li>
-        @if (Model.Messages.Length > 0)
-        {
-            foreach (var messageModel in Model.Messages)
-            {
-                <li class="list-group-item">
-                    <!--Intentionally render the raw message, which could be a script and exploited via XSS-->
-                    @Html.Raw(messageModel.Message)
-
-                    @using (Html.BeginForm("DeleteMessage", "Profile", FormMethod.Post))
+        
+        <li class="list-group-item">
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th>Message</th>
+                    <th>Options</th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.Messages.Length > 0)
+                {
+                    foreach (var messageModel in Model.Messages)
                     {
-                        <input hidden id="Id" name="Id" value="@messageModel.Id"/>
-                        <input type="submit" value="Delete" class="btn btn-sm btn-danger"/>
+                        <tr>
+                            <td>
+                                @if (messageModel.DisplayRaw)
+                                {
+                                    <!--Render the raw message, which could be a script and exploited via XSS-->
+                                    @Html.Raw(messageModel.Message)
+                                }
+                                else
+                                {
+                                    <!--Render the message via the default method, which is encoded-->
+                                    @messageModel.Message
+                                }
+                            </td>
+                            <td>
+                                @if (messageModel.DisplayRaw)
+                                {
+                                    @using (Html.BeginForm("ToggleRawMessage", "Profile", FormMethod.Post))
+                                    {
+                                        <input hidden id="Id" name="Id" value="@messageModel.Id"/>
+                                        <input type="submit" value="Render default" class="btn btn-sm btn-warning"/>
+                                    }
+
+                                    @using (Html.BeginForm("DeleteMessage", "Profile", FormMethod.Post))
+                                    {
+                                        <input hidden id="Id" name="Id" value="@messageModel.Id"/>
+                                        <input type="submit" value="Delete" class="btn btn-sm btn-danger"/>
+                                    }
+                                }
+                                else
+                                {
+                                    @using (Html.BeginForm("ToggleRawMessage", "Profile", FormMethod.Post))
+                                    {
+                                        <input hidden id="Id" name="Id" value="@messageModel.Id"/>
+                                        <input type="submit" value="Render raw" class="btn btn-sm btn-warning"/>
+                                    }
+
+                                    @using (Html.BeginForm("DeleteMessage", "Profile", FormMethod.Post))
+                                    {
+                                        <input hidden id="Id" name="Id" value="@messageModel.Id"/>
+                                        <input type="submit" value="Delete" class="btn btn-sm btn-danger"/>
+                                    }
+                                }
+                            </td>
+                        </tr>
                     }
-                </li>
-            }
-        }
-        else
-        {
-            <li class="list-group-item">
-                <p>No messages</p>
-            </li>
-        }
+                }
+                </tbody>
+            </table>
+        </li>
     </ul>
 </div>

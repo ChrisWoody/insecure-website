@@ -19,6 +19,7 @@ create table [UserMessage]
 (
 	[Id] int identity(1,1) primary key,
 	[Username] varchar(20) not null,
+	[DisplayRaw] bit not null,
 	[Message] nvarchar(2048) not null
 )
 go
