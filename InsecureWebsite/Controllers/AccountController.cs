@@ -136,7 +136,7 @@ public class AccountController : Controller
         return LocalRedirect("/Profile");
     }
 
-    // Without antiforgery, its possible to cause user to logout if clicking on a link or XSS
+    // Without antiforgery, its possible to cause user to logout if clicking on a link or XSS via CSRF
     [HttpGet]
     public async Task<IActionResult> Logout()
     {

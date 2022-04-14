@@ -51,4 +51,37 @@ public class MessengerController : Controller
             Messages = messages
         });
     }
+
+    [HttpPost]
+    public async Task<IActionResult> SendMessage(MessengerSendMessageToOtherUserModel model)
+    {
+        if (!ModelState.IsValid)
+            return View("Index");
+
+        await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
+        con.Open();
+
+        if (await UserExists(model.OtherUser))
+        {
+            await con.ExecuteAsync("insert into [UserToUserMessage]([FromUsername], [ToUsername], [Message]) values (@FromUsername, @ToUsername, @Message)",
+                new { FromUsername = User.Identity.Name, ToUsername = model.OtherUser, model.Message });
+
+            ViewBag.Success = $"Message successfully sent to \"{model.OtherUser}\"";
+        }
+        else
+        {
+            ModelState.AddModelError("OtherUser", $"Other user \"{model.OtherUser}\" doesn't exist");
+        }
+
+        return View("Index");
+    }
+
+    private async Task<bool> UserExists(string username)
+    {
+        await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
+        con.Open();
+
+        var results = await con.QueryAsync<string>("select top 1 [Username] from [User] where [Username] = @username", new { username });
+        return results.Any();
+    }
 }
