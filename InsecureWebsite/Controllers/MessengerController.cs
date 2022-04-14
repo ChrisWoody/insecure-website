@@ -21,37 +21,23 @@ public class MessengerController : Controller
         return View();
     }
 
+    // Intentionally setup for sql injection by not sanitizing or paramaterizing the input
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> GetMessages(MessengerGetMessagesFromOtherUserModel model)
     {
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
         con.Open();
 
-        var messages = new Dictionary<string, List<string>>();
+        var messages = Array.Empty<MessengerModel.MessageModel>();
 
         try
         {
-            
-            var reader = await con.ExecuteReaderAsync(
+            messages = (await con.QueryAsync<MessengerModel.MessageModel>(
                 "select [FromUsername], [ToUsername], [Message] from [UserToUserMessage]" +
                 "where ([FromUsername] = '" + model.OtherUser + "' and [ToUsername] = '" + User.Identity.Name + "')" +
-                "or ([FromUsername] = '" + User.Identity.Name + "' and [ToUsername] = '" + model.OtherUser + "')");
-            while (await reader.ReadAsync())
-            {
-                for (var i = 0; i < reader.FieldCount; i++)
-                {
-                    var fieldName = reader.GetName(i);
-                    var fieldValue = reader.GetValue(i).ToString() ?? "NULL";
-
-                    if (messages.TryGetValue(fieldName, out var list))
-                    {
-                        list.Add(fieldValue);
-                    }
-                    else
-                    {
-                        messages[fieldName] = new List<string>(new[] {fieldValue});
-                    }
-                }
-            }
+                "or ([FromUsername] = '" + User.Identity.Name + "' and [ToUsername] = '" + model.OtherUser + "')"))
+                .ToArray();
 
             ViewBag.Success = $"Query successfully ran with OtherUser \"{model.OtherUser}\"";
         }
@@ -62,7 +48,7 @@ public class MessengerController : Controller
 
         return View("Index", new MessengerModel
         {
-            Messages = messages.ToDictionary(x => x.Key, x => x.Value.ToArray())
+            Messages = messages
         });
     }
 }

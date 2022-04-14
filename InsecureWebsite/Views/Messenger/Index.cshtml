@@ -28,25 +28,23 @@
 {
     <h3>Messages</h3>
 
-    if (Model.Messages.Count > 0)
+    if (Model.Messages.Length > 0)
     {
         <table class="table">
             <thead>
             <tr>
-                @foreach (var key in Model.Messages.Keys)
-                {
-                    <th>@key</th>
-                }
+                <th>From</th>
+                <th>To</th>
+                <th>Message</th>
             </tr>
             </thead>
             <tbody>
-            @for (var i = 0; i < Model.Messages.First().Value.Length; i++)
+            @foreach (var messageModel in Model.Messages)
             {
                 <tr>
-                    @foreach (var key in Model.Messages.Keys)
-                    {
-                        <td>@Model.Messages[key][i]</td>
-                    }
+                    <td>@messageModel.FromUsername</td>
+                    <td>@messageModel.ToUsername</td>
+                    <td>@Html.Raw(messageModel.Message)</td>
                 </tr>
             }
             </tbody>

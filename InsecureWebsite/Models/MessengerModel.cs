@@ -2,5 +2,12 @@
 
 public class MessengerModel
 {
-    public Dictionary<string, string[]> Messages { get; set; }
+    public MessageModel[] Messages { get; set; }
+
+    public class MessageModel
+    {
+        public string FromUsername { get; set; }
+        public string ToUsername { get; set; }
+        public string Message { get; set; }
+    }
 }
