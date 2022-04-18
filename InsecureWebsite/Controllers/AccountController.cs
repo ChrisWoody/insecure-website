@@ -66,10 +66,14 @@ public class AccountController : Controller
     {
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
         await con.OpenAsync();
-        await con.ExecuteAsync("insert into [User] ([Username], [Password]) values (@Username, @Password)", new
+        var random = new Random();
+
+        await con.ExecuteAsync("insert into [User] ([Username], [Password], [DateOfBirth], [HealthIdentifier]) values (@Username, @Password, @DateOfBirth, @HealthIdentifier)", new
         {
             loginRegisterModel.Username,
-            Password = CipherStringWithAnUnguessableMechanism(loginRegisterModel.Password)
+            Password = CipherStringWithAnUnguessableMechanism(loginRegisterModel.Password),
+            DateOfBirth = new DateTime(1970, 1, 1).AddDays(random.Next(0, 15000)),
+            HealthIdentifier = "HIN" + string.Join("", Enumerable.Range(0, 10).Select(x => random.Next(0, 9)))
         });
     }
 

@@ -4,12 +4,14 @@ go
 create table [User]
 (
 	[Username] varchar(20) not null primary key,
-	[Password] varchar(20) not null
+	[Password] varchar(20) not null,
+	[DateOfBirth] date not null,
+	[HealthIdentifier] varchar(13) not null
 )
 go
 
-insert into [User] ([Username], [Password])
-values ('Admin', 'Spohxmouo4oCK5srHvL') --SomethingVerySecret
+insert into [User] ([Username], [Password], [DateOfBirth], [HealthIdentifier])
+values ('Admin', 'Spohxmouo4oCK5srHvL', '1970-01-02', 'HIN4569871230') --SomethingVerySecret
 
 
 drop table if exists [UserMessage]
