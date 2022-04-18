@@ -16,6 +16,7 @@ public class ProfileController : Controller
         _configuration = configuration;
     }
 
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         return View("Index", await GetProfileModel());
@@ -27,24 +28,24 @@ public class ProfileController : Controller
     {
         if (string.IsNullOrWhiteSpace(model.Password))
         {
-            ViewBag.Error = "Must specify a password";
+            TempData["Error"] = "Must specify a password";
             return RedirectToAction("Index");
         }
 
         if (model.Password.Length > 20)
         {
-            ViewBag.Error = "Password must be less than 20 characters";
+            TempData["Error"] = "Password must be less than 20 characters";
             return RedirectToAction("Index");
         }
 
         if (!model.Password.All(_configuration["AllowedPasswordCharacters"].Contains))
         {
-            ViewBag.Error = "Password must only contain the following characters: " + _configuration["AllowedPasswordCharacters"];
+            TempData["Error"] = "Password must only contain the following characters: " + _configuration["AllowedPasswordCharacters"];
             return RedirectToAction("Index");
         }
 
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
-        con.Open();
+        await con.OpenAsync();
 
         await con.ExecuteAsync("update [User] set [Password] = @Password where [Username] = @Username", new
         {
@@ -52,10 +53,11 @@ public class ProfileController : Controller
             Password = CipherStringWithAnUnguessableMechanism(model.Password)
         });
 
-        ViewBag.Success = "You're password has been updated successfully";
+        TempData["Success"] = "You're password has been updated successfully";
         return RedirectToAction("Index");
     }
 
+    // No sanitization of the input
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> PostMessage(PostMessageModel model)

@@ -7,12 +7,12 @@
 
 <h2>Register</h2>
 
-@if (!string.IsNullOrWhiteSpace(ViewBag.Error))
+@if (TempData.TryGetValue("Error", out var error))
 {
-    <p class="text-danger">@ViewBag.Error</p>
+    <p class="text-danger">@error</p>
 }
 
-<form method="post" action="/Account/Register">
+<form method="post" action="/Account/RegisterAccount">
     Username
     <input type="text" id="Username" name="Username" value="" />
     <br/>

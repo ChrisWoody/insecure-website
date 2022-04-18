@@ -7,13 +7,13 @@
 <h2>Hi @User.Identity.Name and welcome to your profile!</h2>
 <p>Here you'll see no sensitive information because this is an insecure website and that would be silly.</p>
 
-@if (!string.IsNullOrWhiteSpace(ViewBag.Error))
+@if (TempData.TryGetValue("Error", out var error))
 {
-    <p class="text-danger">@ViewBag.Error</p>
+    <p class="text-danger">@error</p>
 }
-@if (!string.IsNullOrWhiteSpace(ViewBag.Success))
+@if (TempData.TryGetValue("Success", out var success))
 {
-    <p class="text-success">@ViewBag.Success</p>
+    <p class="text-success">@success</p>
 }
 
 <div class="card" style="width: 30rem;">

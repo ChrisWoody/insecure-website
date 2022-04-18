@@ -22,64 +22,83 @@ public class MessengerController : Controller
     }
 
     // Intentionally setup for sql injection by not sanitizing or paramaterizing the input
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> GetMessages(MessengerGetMessagesFromOtherUserModel model)
+    // Also to help iteration on the injection sql, safely handle invalid sql and return the response to the user
+    [HttpGet]
+    public async Task<IActionResult> Index(string otherUser)
     {
-        await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
-        con.Open();
+        if (string.IsNullOrWhiteSpace(otherUser))
+            return View();
 
-        var messages = Array.Empty<MessengerModel.MessageModel>();
+        await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
+        await con.OpenAsync();
 
         try
         {
-            messages = (await con.QueryAsync<MessengerModel.MessageModel>(
+            var messages = (await con.QueryAsync<MessengerModel.MessageModel>(
                 "select [FromUsername], [ToUsername], [Message] from [UserToUserMessage]" +
-                "where ([FromUsername] = '" + model.OtherUser + "' and [ToUsername] = '" + User.Identity.Name + "')" +
-                "or ([FromUsername] = '" + User.Identity.Name + "' and [ToUsername] = '" + model.OtherUser + "')"))
+                "where ([FromUsername] = '" + otherUser + "' and [ToUsername] = '" + User.Identity.Name + "')" +
+                "or ([FromUsername] = '" + User.Identity.Name + "' and [ToUsername] = '" + otherUser + "')"))
                 .ToArray();
 
-            ViewBag.Success = $"Query successfully ran with OtherUser \"{model.OtherUser}\"";
+            TempData["Success"] = $"Successfully pulled messages with OtherUser \"{otherUser}\"";
+
+            return View("Index", new MessengerModel
+            {
+                Messages = messages
+            });
         }
         catch (Exception ex)
         {
-            ViewBag.Error = $"Error occurred running database query with OtherUser \"{model.OtherUser}\": {ex.Message}";
+            TempData["Error"] = $"An unexpected error occurred trying to find messages with OtherUser \"{otherUser}\": {ex.Message}";
+            return View();
         }
-
-        return View("Index", new MessengerModel
-        {
-            Messages = messages
-        });
     }
 
+    // Intentionally no antiforgery check
     [HttpPost]
     public async Task<IActionResult> SendMessage(MessengerSendMessageToOtherUserModel model)
     {
-        if (!ModelState.IsValid)
-            return View("Index");
+        if (string.IsNullOrWhiteSpace(model.OtherUser) ||
+            string.IsNullOrWhiteSpace(model.Message))
+        {
+            TempData["Error"] = "Must specify OtherUser and Message";
+            return RedirectToAction("Index");
+        }
+
+        if (model.OtherUser.Length > 20)
+        {
+            TempData["Error"] = "OtherUser must be 20 characters or less in length";
+            return RedirectToAction("Index");
+        }
+
+        if (model.Message.Length > 2048)
+        {
+            TempData["Error"] = "Message must be 2048 characters or less in length";
+            return RedirectToAction("Index");
+        }
 
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
-        con.Open();
+        await con.OpenAsync();
 
         if (await UserExists(model.OtherUser))
         {
             await con.ExecuteAsync("insert into [UserToUserMessage]([FromUsername], [ToUsername], [Message]) values (@FromUsername, @ToUsername, @Message)",
                 new { FromUsername = User.Identity.Name, ToUsername = model.OtherUser, model.Message });
 
-            ViewBag.Success = $"Message successfully sent to \"{model.OtherUser}\"";
-        }
-        else
-        {
-            ModelState.AddModelError("OtherUser", $"Other user \"{model.OtherUser}\" doesn't exist");
+            TempData["Success"] = $"Message successfully sent to \"{model.OtherUser}\"";
+
+            return RedirectToAction("Index", new {model.OtherUser});
         }
 
-        return View("Index");
+        TempData["Error"] = $"Other user \"{model.OtherUser}\" doesn't exist";
+
+        return RedirectToAction("Index");
     }
 
     private async Task<bool> UserExists(string username)
     {
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
-        con.Open();
+        await con.OpenAsync();
 
         var results = await con.QueryAsync<string>("select top 1 [Username] from [User] where [Username] = @username", new { username });
         return results.Any();

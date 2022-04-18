@@ -8,16 +8,14 @@
 <h2>Messenger</h2>
 <p>Look at or send messages between yourself and another user.</p>
 
-@if (!string.IsNullOrWhiteSpace(ViewBag.Error))
+@if (TempData.TryGetValue("Error", out var error))
 {
-    <p class="text-danger">@ViewBag.Error</p>
+    <p class="text-danger">@error</p>
 }
-@if (!string.IsNullOrWhiteSpace(ViewBag.Success))
+@if (TempData.TryGetValue("Success", out var success))
 {
-    <p class="text-success">@ViewBag.Success</p>
+    <p class="text-success">@success</p>
 }
-
-@Html.ValidationSummary("", new {@class = "text-danger"})
 
 @using (Html.BeginForm("SendMessage", "Messenger", FormMethod.Post))
 {
@@ -30,11 +28,11 @@
     <input type="submit" value="Submit" class="btn btn-sm btn-success"/>
 }
 
-@using (Html.BeginForm("GetMessages", "Messenger", FormMethod.Post))
+@using (Html.BeginForm("Index", "Messenger", FormMethod.Get))
 {
     <h3>Search for messages</h3>
     <label>Other user</label>
-    <input id="OtherUser" type="text" name="OtherUser" value=""/>
+    <input id="otherUser" type="text" name="otherUser" value=""/>
     <input type="submit" value="Search" class="btn btn-sm btn-success"/>
 }
 
