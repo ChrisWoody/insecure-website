@@ -110,6 +110,8 @@ try
         az webapp cors add --name $appServiceName --resource-group $resourceGroupName --allowed-origins "*"
         az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --connection-string-type SQLAzure --settings "DatabaseConnectionString=$sqlDatabaseConnectionString"
         az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --settings "ASPNETCORE_ENVIRONMENT=Development"
+        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --settings "ShowPublicBoard=false"
+        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --settings "ShowMessenger=false"
     }
     else
     {

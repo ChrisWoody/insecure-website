@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -27,12 +30,18 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">Profile</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="PublicBoard" asp-action="Index">Public Board</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Messenger" asp-action="Index">Messenger</a>
-                            </li>
+                            @if (Configuration["ShowPublicBoard"] == "true")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="PublicBoard" asp-action="Index">Public Board</a>
+                                </li>
+                            }
+                            @if (Configuration["ShowMessenger"] == "true")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Messenger" asp-action="Index">Messenger</a>
+                                </li>
+                            }
                             @if (User.Identity.Name == "Admin")
                             {
                                 <li class="nav-item">
