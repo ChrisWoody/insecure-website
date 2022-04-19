@@ -6,7 +6,6 @@
 }
 
 <h2>Messenger</h2>
-<p>Look at or send messages between yourself and another user.</p>
 
 @if (TempData.TryGetValue("Error", out var error))
 {
@@ -17,24 +16,47 @@
     <p class="text-success">@success</p>
 }
 
-@using (Html.BeginForm("SendMessage", "Messenger", FormMethod.Post))
-{
-    <h3>Send message</h3>
-    <label>Other user</label>
-    <input id="OtherUser" type="text" name="OtherUser" value="" maxlength="20"/>
-    <br/>
-    <label>Message to send</label>
-    <input id="Message" type="text" name="Message" value="" maxlength="2048"/>
-    <input type="submit" value="Submit" class="btn btn-sm btn-success"/>
-}
-
-@using (Html.BeginForm("Index", "Messenger", FormMethod.Get))
-{
-    <h3>Search for messages</h3>
-    <label>Other user</label>
-    <input id="otherUser" type="text" name="otherUser" value=""/>
-    <input type="submit" value="Search" class="btn btn-sm btn-success"/>
-}
+<div class="card" style="width: 50rem;">
+    <div class="card-header" style="font-weight: bold">Send message</div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            Send messages to another user.
+        </li>
+        <li class="list-group-item">
+            <div class="card-body">
+                @using (Html.BeginForm("SendMessage", "Messenger", FormMethod.Post))
+                {
+                    <label>Other user</label>
+                    <input class="form-control" id="OtherUser" type="text" name="OtherUser" value="" maxlength="20"/>
+                    <br/>
+                    <label>Message to send</label>
+                    <input class="form-control" id="Message" type="text" name="Message" value="" style="width: 100%" maxlength="2048"/>
+                    <input type="submit" value="Submit" class="btn btn-sm btn-success"/>
+                }
+            </div>
+        </li>
+    </ul>
+</div>
+<br/>
+<div class="card" style="width: 50rem;">
+    <div class="card-header" style="font-weight: bold">Search messages</div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            Search for messages you've sent to and received from another user.
+        </li>
+        <li class="list-group-item">
+            <div class="card-body">
+                @using (Html.BeginForm("Index", "Messenger", FormMethod.Get))
+                {
+                    <label>Other user</label>
+                    <input class="form-control" id="otherUser" type="text" name="otherUser" value=""/>
+                    <input type="submit" value="Search" class="btn btn-sm btn-success"/>
+                }
+            </div>
+        </li>
+    </ul>
+</div>
+<br/>
 
 @if (Model != null && Model.Messages != null)
 {

@@ -16,8 +16,8 @@
     <p class="text-success">@success</p>
 }
 
-<div class="card" style="width: 30rem;">
-    <div class="card-header">Change password</div>
+<div class="card" style="width: 50rem;">
+    <div class="card-header" style="font-weight: bold">Change password</div>
     <div class="card-body">
         <form method="post" action="/Profile/ChangePassword">
             <div>
@@ -28,8 +28,8 @@
     </div>
 </div>
 <br/>
-<div class="card" style="width: 30rem;">
-    <div class="card-header">Message board</div>
+<div class="card" style="width: 50rem;">
+    <div class="card-header" style="font-weight: bold">Message board</div>
     <ul class="list-group list-group-flush">
         <li class="list-group-item">
             This is your personal message board, here you can try out some XSS attacks.
@@ -41,7 +41,7 @@
                 {
                     <label>Message to post</label>
                     <!--Client side only restriction on the maxLength of the input field-->
-                    <input id="Message" type="text" name="Message" value="" maxlength="2048"/>
+                    <input class="form-control" id="Message" type="text" name="Message" value="" style="width: 100%" maxlength="2048"/>
                     <input type="submit" value="Submit" class="btn btn-sm btn-success"/>
                 }
 
