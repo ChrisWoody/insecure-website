@@ -35,6 +35,7 @@ try
     $sqlServerName = $name + "sql";
     $sqlDatabaseName = $name + "db";
     $sqlServerAdminUsername = "sqladmin";
+    $sqlDatabaseConnectionString = "Server=tcp:$sqlServerName.database.windows.net,1433;Database=$sqlDatabaseName;User ID=$sqlServerAdminUsername;Password=$sqlServerAdminPassword;Encrypt=true;TrustServerCertificate=false;Connection Timeout=30;"
 
     az account set --subscription $subscriptionId
 
@@ -77,6 +78,8 @@ try
     {
         Write-Host "Creating the SQL database $sqlDatabaseName"
         az sql db create --resource-group $resourceGroupName --server $sqlServerName --name $sqlDatabaseName --service-objective S3
+        Start-Sleep -Seconds 10
+        Invoke-Sqlcmd -ConnectionString $sqlDatabaseConnectionString -InputFile "..\InsecureWebsite\Models\DatabaseScript.sql"
     }
     else
     {
@@ -99,6 +102,9 @@ try
     {
         Write-Host "Creating the app service $appServiceName"
         az webapp create --name $appServiceName --resource-group $resourceGroupName --plan $appServicePlanName --runtime "DOTNET:6.0"
+        az webapp cors add --name $appServiceName --resource-group $resourceGroupName --allowed-origins "*"
+        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --connection-string-type SQLAzure --settings "DatabaseConnectionString=$sqlDatabaseConnectionString"
+        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --settings "ASPNETCORE_ENVIRONMENT=Development"
     }
     else
     {
@@ -121,17 +127,12 @@ try
     {
         Write-Host "Creating the app insights $appInsightsName"
         az monitor app-insights component create --app $appInsightsName --resource-group $resourceGroupName --location $location --kind web --application-type web --workspace $appInsightsWorkspaceName
+        az monitor app-insights component connect-webapp --resource-group $resourceGroupName --web-app $appServiceName --app $appInsightsName
     }
     else
     {
         Write-Host "App insights $appInsightsName already exists"
     }
-    
-
-    az monitor app-insights component connect-webapp --resource-group $resourceGroupName --web-app $appServiceName --app $appInsightsName
-
-    $connectionString = "Server=tcp:$sqlServerName.database.windows.net,1433;Database=$sqlDatabaseName;User ID=$sqlServerAdminUsername;Password=$sqlServerAdminPassword;Encrypt=true;TrustServerCertificate=false;Connection Timeout=30;"
-    az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --connection-string-type SQLAzure --settings "DatabaseConnectionString=$connectionString"
 
     if ($LASTEXITCODE -eq 1)
     {

@@ -10,10 +10,12 @@ namespace InsecureWebsite.Controllers;
 public class MessengerController : Controller
 {
     private readonly IConfiguration _configuration;
+    private readonly ILogger<HomeController> _logger;
 
-    public MessengerController(IConfiguration configuration)
+    public MessengerController(IConfiguration configuration, ILogger<HomeController> logger)
     {
         _configuration = configuration;
+        _logger = logger;
     }
 
     public IActionResult Index()
@@ -35,8 +37,8 @@ public class MessengerController : Controller
         try
         {
             var messages = (await con.QueryAsync<MessengerModel.MessageModel>(
-                "select [FromUsername], [ToUsername], [Message] from [UserToUserMessage]" +
-                "where ([FromUsername] = '" + otherUser + "' and [ToUsername] = '" + User.Identity.Name + "')" +
+                "select [FromUsername], [ToUsername], [Message] from [UserToUserMessage] " +
+                "where ([FromUsername] = '" + otherUser + "' and [ToUsername] = '" + User.Identity.Name + "') " +
                 "or ([FromUsername] = '" + User.Identity.Name + "' and [ToUsername] = '" + otherUser + "')"))
                 .ToArray();
 
@@ -50,6 +52,7 @@ public class MessengerController : Controller
         catch (Exception ex)
         {
             TempData["Error"] = $"An unexpected error occurred trying to find messages with OtherUser \"{otherUser}\": {ex.Message}";
+            _logger.LogError(ex, $"Error retrieving messages for {otherUser} with {User.Identity.Name}");
             return View();
         }
     }
