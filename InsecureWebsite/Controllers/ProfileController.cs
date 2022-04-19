@@ -64,7 +64,7 @@ public class ProfileController : Controller
     {
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
         await con.OpenAsync();
-        await con.ExecuteAsync("insert into [UserMessage]([Username], [DisplayRaw], [Message]) values (@Username, 1, @Message)",
+        await con.ExecuteAsync("insert into [UserMessage]([Username], [DisplayRaw], [Hide], [Message]) values (@Username, 1, 0, @Message)",
             new {Username = User.Identity.Name, model.Message});
 
         return RedirectToAction("Index");
@@ -89,7 +89,7 @@ public class ProfileController : Controller
     {
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
         await con.OpenAsync();
-        await con.ExecuteAsync("delete from [UserMessage] where [Id] = @Id", model);
+        await con.ExecuteAsync("update [UserMessage] set [Hide] = 1 where [Id] = @Id", model);
 
         return RedirectToAction("Index");
     }
@@ -116,13 +116,13 @@ public class ProfileController : Controller
         await con.OpenAsync();
 
         var messages = await con.QueryAsync<ProfileMessageModel>(
-            "select [Id], [DisplayRaw], [Message] from [UserMessage] where [Username] = @Username",
+            "select [Id], [DisplayRaw], [Hide], [Message] from [UserMessage] where [Username] = @Username",
             new { Username = User.Identity.Name });
 
         var model = new ProfileModel
         {
             Username = User.Identity.Name,
-            Messages = messages?.ToArray() ?? Array.Empty<ProfileMessageModel>()
+            Messages = messages?.Where(x => !x.Hide).ToArray() ?? Array.Empty<ProfileMessageModel>()
         };
         return model;
     }

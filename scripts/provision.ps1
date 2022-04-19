@@ -36,6 +36,7 @@ try
     $sqlDatabaseName = $name + "db";
     $sqlServerAdminUsername = "sqladmin";
     $sqlDatabaseConnectionString = "Server=tcp:$sqlServerName.database.windows.net,1433;Database=$sqlDatabaseName;User ID=$sqlServerAdminUsername;Password=$sqlServerAdminPassword;Encrypt=true;TrustServerCertificate=false;Connection Timeout=30;"
+    $sqlDatabaseMasterConnectionString = $sqlDatabaseConnectionString -replace $sqlDatabaseName, "master"
 
     az account set --subscription $subscriptionId
 
@@ -80,6 +81,10 @@ try
         az sql db create --resource-group $resourceGroupName --server $sqlServerName --name $sqlDatabaseName --service-objective S3
         Start-Sleep -Seconds 10
         Invoke-Sqlcmd -ConnectionString $sqlDatabaseConnectionString -InputFile "..\InsecureWebsite\Models\DatabaseScript.sql"
+        Invoke-Sqlcmd -ConnectionString $sqlDatabaseMasterConnectionString -Query "CREATE LOGIN [WebAppLogin] WITH PASSWORD=N'$sqlServerAdminPassword'"
+        Invoke-Sqlcmd -ConnectionString $sqlDatabaseConnectionString -Query "CREATE USER [WebAppUser] FOR LOGIN [WebAppLogin]"
+        Invoke-Sqlcmd -ConnectionString $sqlDatabaseConnectionString -Query "GRANT SELECT, INSERT, UPDATE ON SCHEMA::[dbo] TO [WebAppUser]"
+        $sqlDatabaseConnectionString = $sqlDatabaseConnectionString -replace $sqlServerAdminUsername, "WebAppLogin"
     }
     else
     {
