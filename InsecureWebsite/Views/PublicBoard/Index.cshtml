@@ -1,0 +1,68 @@
+﻿@model InsecureWebsite.Models.PublicBoardModel
+
+@{
+    ViewBag.Title = "Public Board";
+    Layout = "_Layout";
+}
+
+<h2>Public Board</h2>
+
+@if (TempData.TryGetValue("Error", out var error))
+{
+    <p class="text-danger">@error</p>
+}
+@if (TempData.TryGetValue("Success", out var success))
+{
+    <p class="text-success">@success</p>
+}
+
+<div class="card" style="width: 50rem;">
+    <div class="card-header" style="font-weight: bold">Send message</div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            Send a message that everyone can see!
+        </li>
+        <li class="list-group-item">
+            <div class="card-body">
+                @using (Html.BeginForm("SendMessage", "PublicBoard", FormMethod.Post))
+                {
+                    <label>Message to send</label>
+                    <input class="form-control" id="Message" type="text" name="Message" value="" style="width: 100%" maxlength="2048"/>
+                    <input type="submit" value="Submit" class="btn btn-sm btn-success"/>
+                }
+            </div>
+        </li>
+    </ul>
+</div>
+<br/>
+<br/>
+
+@if (Model != null && Model.Messages != null)
+{
+    <h3>Messages</h3>
+
+    if (Model.Messages.Length > 0)
+    {
+        <table class="table">
+            <thead>
+            <tr>
+                <th>From</th>
+                <th>Message</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var messageModel in Model.Messages)
+            {
+                <tr>
+                    <td>@messageModel.Username</td>
+                    <td>@Html.Raw(messageModel.Message)</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No messages found</p>
+    }
+}

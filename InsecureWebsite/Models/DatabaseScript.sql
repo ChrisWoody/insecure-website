@@ -39,3 +39,15 @@ create table [UserToUserMessage]
 	[Message] nvarchar(2048) not null
 )
 go
+
+
+drop table if exists [PublicBoard]
+go
+
+create table [PublicBoard]
+(
+	[Id] int identity(1,1) primary key,
+	[Username] varchar(20) not null,
+	[Message] nvarchar(2048) not null
+)
+go
