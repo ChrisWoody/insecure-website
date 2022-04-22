@@ -26,8 +26,6 @@ try
     New-Item -Path $artifactsPath -ItemType Directory | Out-Null
     New-Item -Path $artifactsTempPath -ItemType Directory | Out-Null
 
-    dotnet clean "$srcPath\InsecureWebsite.sln"
-    dotnet restore "$srcPath\InsecureWebsite.sln"
     dotnet publish "$srcPath\InsecureWebsite\InsecureWebsite.csproj" -c Release --no-restore --output "$artifactsTempPath\InsecureWebsite\"
 
     Compress-Archive -Path "$artifactsTempPath\InsecureWebsite\*" -DestinationPath "$artifactsPath\InsecureWebsite.zip" -CompressionLevel Optimal -Force

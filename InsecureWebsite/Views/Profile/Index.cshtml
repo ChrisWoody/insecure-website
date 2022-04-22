@@ -6,6 +6,7 @@
 
 <h2>Hi @User.Identity.Name and welcome to your profile!</h2>
 <p>Here you'll see no sensitive information because this is an insecure website and that would be silly.</p>
+<!--What are you doing here? I said there was no sensitive information!-->
 
 @if (TempData.TryGetValue("Error", out var error))
 {
@@ -32,7 +33,9 @@
     <div class="card-header" style="font-weight: bold">Message board</div>
     <ul class="list-group list-group-flush">
         <li class="list-group-item">
-            This is your personal message board, here you can try out some XSS attacks.
+            <p>This is your personal message board, here you can try out some XSS attacks.</p>
+            <p>Try something like this to get started, any HTML/CSS/JS should work:</p>
+            <p>&lt;style&gt;p{color: red;font-weight: bold}&lt;/style&gt;</p>
         </li>
         <li class="list-group-item">
             <div class="card-body">

@@ -24,13 +24,13 @@
         </li>
         <li class="list-group-item">
             <div class="card-body">
-                @using (Html.BeginForm("SendMessage", "Messenger", FormMethod.Post))
+                @using (Html.BeginForm("SendMessage", "Messenger", FormMethod.Post, new {name = "SendMessageForm"}))
                 {
                     <label>Other user</label>
-                    <input class="form-control" id="OtherUser" type="text" name="OtherUser" value="" maxlength="20"/>
+                    <input class="form-control" id="SendMessageOtherUser" type="text" name="OtherUser" value="" maxlength="20"/>
                     <br/>
                     <label>Message to send</label>
-                    <input class="form-control" id="Message" type="text" name="Message" value="" style="width: 100%" maxlength="2048"/>
+                    <input class="form-control" id="SendMessageMessage" type="text" name="Message" value="" style="width: 100%" maxlength="2048"/>
                     <input type="submit" value="Submit" class="btn btn-sm btn-success"/>
                 }
             </div>
@@ -49,7 +49,7 @@
                 @using (Html.BeginForm("Index", "Messenger", FormMethod.Get))
                 {
                     <label>Other user</label>
-                    <input class="form-control" id="otherUser" type="text" name="otherUser" value=""/>
+                    <input class="form-control" id="otherUserSearch" type="text" name="otherUserSearch" value=""/>
                     <input type="submit" value="Search" class="btn btn-sm btn-success"/>
                 }
             </div>

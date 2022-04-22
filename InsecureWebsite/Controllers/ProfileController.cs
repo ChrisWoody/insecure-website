@@ -122,7 +122,7 @@ public class ProfileController : Controller
         var model = new ProfileModel
         {
             Username = User.Identity.Name,
-            Messages = messages?.Where(x => !x.Hide).ToArray() ?? Array.Empty<ProfileMessageModel>()
+            Messages = messages?.Where(x => !x.Hide).OrderByDescending(x => x.Id).ToArray() ?? Array.Empty<ProfileMessageModel>()
         };
         return model;
     }

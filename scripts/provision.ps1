@@ -84,7 +84,6 @@ try
         Invoke-Sqlcmd -ConnectionString $sqlDatabaseMasterConnectionString -Query "CREATE LOGIN [WebAppLogin] WITH PASSWORD=N'$sqlServerAdminPassword'"
         Invoke-Sqlcmd -ConnectionString $sqlDatabaseConnectionString -Query "CREATE USER [WebAppUser] FOR LOGIN [WebAppLogin]"
         Invoke-Sqlcmd -ConnectionString $sqlDatabaseConnectionString -Query "GRANT SELECT, INSERT, UPDATE ON SCHEMA::[dbo] TO [WebAppUser]"
-        $sqlDatabaseConnectionString = $sqlDatabaseConnectionString -replace $sqlServerAdminUsername, "WebAppLogin"
     }
     else
     {
@@ -95,7 +94,7 @@ try
     if ($appServicePlan.Length -eq 0)
     {
         Write-Host "Creating the app service plan $appServicePlanName"
-        az appservice plan create --name $appServicePlanName --resource-group $resourceGroupName --location $location --sku S1
+        az appservice plan create --name $appServicePlanName --resource-group $resourceGroupName --location $location --sku S3
     }
     else
     {
@@ -107,11 +106,14 @@ try
     {
         Write-Host "Creating the app service $appServiceName"
         az webapp create --name $appServiceName --resource-group $resourceGroupName --plan $appServicePlanName --runtime "DOTNET:6.0"
-        az webapp cors add --name $appServiceName --resource-group $resourceGroupName --allowed-origins "*"
-        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --connection-string-type SQLAzure --settings "DatabaseConnectionString=$sqlDatabaseConnectionString"
-        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --settings "ASPNETCORE_ENVIRONMENT=Development"
-        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --settings "ShowPublicBoard=false"
-        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --settings "ShowMessenger=false"
+        az webapp cors add --name $appServiceName --resource-group $resourceGroupName --allowed-origins "https://localhost"
+        az resource update --name web --resource-group $resourceGroupName --namespace Microsoft.Web --resource-type config --parent sites/$appServiceName --set properties.cors.supportCredentials=true
+
+        $webAppLoginConnectionString = $sqlDatabaseConnectionString -replace $sqlServerAdminUsername, "WebAppLogin"
+        az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --connection-string-type SQLAzure --settings "DatabaseConnectionString=$webAppLoginConnectionString"
+        az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ASPNETCORE_ENVIRONMENT=Development"
+        az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ShowPublicBoard=false"
+        az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ShowMessenger=false"
     }
     else
     {

@@ -26,9 +26,9 @@ public class MessengerController : Controller
     // Intentionally setup for sql injection by not sanitizing or paramaterizing the input
     // Also to help iteration on the injection sql, safely handle invalid sql and return the response to the user
     [HttpGet]
-    public async Task<IActionResult> Index(string otherUser)
+    public async Task<IActionResult> Index(string otherUserSearch)
     {
-        if (string.IsNullOrWhiteSpace(otherUser))
+        if (string.IsNullOrWhiteSpace(otherUserSearch))
             return View();
 
         await using var con = new SqlConnection(_configuration.GetConnectionString("DatabaseConnectionString"));
@@ -38,11 +38,11 @@ public class MessengerController : Controller
         {
             var messages = (await con.QueryAsync<MessengerModel.MessageModel>(
                 "select [FromUsername], [ToUsername], [Message] from [UserToUserMessage] " +
-                "where ([FromUsername] = '" + otherUser + "' and [ToUsername] = '" + User.Identity.Name + "') " +
-                "or ([FromUsername] = '" + User.Identity.Name + "' and [ToUsername] = '" + otherUser + "')"))
+                "where ([FromUsername] = '" + otherUserSearch + "' and [ToUsername] = '" + User.Identity.Name + "') " +
+                "or ([FromUsername] = '" + User.Identity.Name + "' and [ToUsername] = '" + otherUserSearch + "')"))
                 .ToArray();
 
-            TempData["Success"] = $"Successfully pulled messages with OtherUser \"{otherUser}\"";
+            TempData["Success"] = $"Successfully pulled messages with OtherUser \"{otherUserSearch}\"";
 
             return View("Index", new MessengerModel
             {
@@ -51,8 +51,8 @@ public class MessengerController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = $"An unexpected error occurred trying to find messages with OtherUser \"{otherUser}\": {ex.Message}";
-            _logger.LogError(ex, $"Error retrieving messages for {otherUser} with {User.Identity.Name}");
+            TempData["Error"] = $"An unexpected error occurred trying to find messages with OtherUser \"{otherUserSearch}\": {ex.Message}";
+            _logger.LogError(ex, $"Error retrieving messages for {otherUserSearch} with {User.Identity.Name}");
             return View();
         }
     }
