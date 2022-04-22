@@ -79,6 +79,7 @@ try
     {
         Write-Host "Creating the SQL database $sqlDatabaseName"
         az sql db create --resource-group $resourceGroupName --server $sqlServerName --name $sqlDatabaseName --service-objective S3
+        Write-Host "SQL database $sqlDatabaseName created, waiting a bit before seeding database"
         Start-Sleep -Seconds 10
         Invoke-Sqlcmd -ConnectionString $sqlDatabaseConnectionString -InputFile "..\InsecureWebsite\Models\DatabaseScript.sql"
         Invoke-Sqlcmd -ConnectionString $sqlDatabaseMasterConnectionString -Query "CREATE LOGIN [WebAppLogin] WITH PASSWORD=N'$sqlServerAdminPassword'"

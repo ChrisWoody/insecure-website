@@ -3,6 +3,9 @@ Param (
     [string] $subscriptionId = "",
 
     [ValidateNotNullOrEmpty()]
+    [string] $resourceGroupName = "",
+
+    [ValidateNotNullOrEmpty()]
     [string] $appServiceName = ""
 )
 

@@ -11,7 +11,7 @@ create table [User]
 go
 
 insert into [User] ([Username], [Password], [DateOfBirth], [HealthIdentifier])
-values ('Admin', 'Spohxmouo4oCK5srHvL-acqt', '1970-01-02', 'HIN4569871230') --SomethingVerySecret123&(
+values ('Admin', 'Spohxmouo1onDrH&(-mp', '1970-01-02', 'HIN4569871230') --SomethingSecret123&(
 
 
 drop table if exists [UserMessage]
