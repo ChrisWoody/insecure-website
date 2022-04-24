@@ -40,6 +40,7 @@ try
 
     az account set --subscription $subscriptionId
 
+    # Resouce group
     if ((az group exists --name $resourceGroupName) -eq 'false')
     {
         Write-Host "Creating the resource group $resourceGroupName"
@@ -50,6 +51,7 @@ try
         Write-Host "Resource group $resourceGroupName already exists"
     }
 
+    # Storage account (for sql audit logs)
     if (((az storage account check-name --name $storageAccountName) | ConvertFrom-Json).nameAvailable -eq $true)
     {
         Write-Host "Creating the storage account $storageAccountName"
@@ -60,6 +62,7 @@ try
         Write-Host "Storage account $storageAccountName already exists"
     }
 
+    # SQL Server
     $sqlserver = (az sql server list --resource-group $resourceGroupName --query "[?name=='$sqlServerName']" | ConvertFrom-Json)
     if ($sqlserver.Length -eq 0)
     {
@@ -74,6 +77,7 @@ try
         Write-Host "SQL server $sqlServerName already exists"
     }
 
+    # SQL database (also create user with limited access so people can't delete/drop data)
     $sqlDatabase = (az sql db list --resource-group $resourceGroupName --server $sqlServerName --query "[?name=='$sqlDatabaseName']" | ConvertFrom-Json)
     if ($sqlDatabase.Length -eq 0)
     {
@@ -91,6 +95,7 @@ try
         Write-Host "SQL database $sqlDatabaseName already exists"
     }
 
+    # App service plan
     $appServicePlan = (az appservice plan list --resource-group $resourceGroupName --query "[?name=='$appServicePlanName']" | ConvertFrom-Json)
     if ($appServicePlan.Length -eq 0)
     {
@@ -102,6 +107,7 @@ try
         Write-Host "App service plan $appServicePlanName already exists"
     }
 
+    # App service
     $appService = (az webapp list --query "[?name=='$appServiceName']" | ConvertFrom-Json)
     if ($appService.Length -eq 0)
     {
@@ -113,14 +119,15 @@ try
         $webAppLoginConnectionString = $sqlDatabaseConnectionString -replace $sqlServerAdminUsername, "WebAppLogin"
         az webapp config connection-string set --resource-group $resourceGroupName --name $appServiceName --connection-string-type SQLAzure --settings "DatabaseConnectionString=$webAppLoginConnectionString"
         az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ASPNETCORE_ENVIRONMENT=Development"
-        az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ShowPublicBoard=false"
-        az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ShowMessenger=false"
+        az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ShowPublicBoard=true"
+        az webapp config appsettings set --resource-group $resourceGroupName --name $appServiceName --settings "ShowMessenger=true"
     }
     else
     {
         Write-Host "App service $appServiceName already exists"
     }
 
+    # Log analytics workspace
     $workspace = (az monitor log-analytics workspace list --query "[?name=='$appInsightsWorkspaceName']" | ConvertFrom-Json)
     if ($workspace.Length -eq 0)
     {
@@ -132,6 +139,7 @@ try
         Write-Host "App insights workspace $appInsightsWorkspaceName already exists"
     }
     
+    # App insights
     $appInsights = (az monitor app-insights component show --app $appInsightsName --resource-group $resourceGroupName | ConvertFrom-Json)
     if ($null -eq $appInsights)
     {
